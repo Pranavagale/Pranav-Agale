@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Farm Chase</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to bottom, #87CEEB, #90EE90);
+            position: relative;
+        }
+        #farmer {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            bottom: 100px;
+            left: 100px;
+        }
+        #tractor {
+            width: 150px;
+            height: 80px;
+            position: absolute;
+            bottom: 100px;
+        }
+        .hurdle {
+            width: 50px;
+            height: 50px;
+            background-color: #8B4513;
+            position: absolute;
+            bottom: 100px;
+        }
+        #score {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            font-family: Arial;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="score">Score: 0</div>
+        <img id="farmer" src="https://img.icons8.com/plasticine/100/farmer.png">
+        <img id="tractor" src="https://img.icons8.com/plasticine/100/tractor.png">
+    </div>
+
+    <script>
+        const farmer = document.getElementById('farmer');
+        const tractor = document.getElementById('tractor');
+        const gameContainer = document.getElementById('gameContainer');
+        const scoreElement = document.getElementById('score');
+        
+        let isJumping = false;
+        let score = 0;
+        let tractorSpeed = 5;
+        let gameActive = true;
+
+        // Farmer controls
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !isJumping) {
+                jump();
+            }
+        });
+
+        function jump() {
+            if (!isJumping) {
+                isJumping = true;
+                let jumpHeight = 0;
+                const jumpInterval = setInterval(() => {
+                    if (jumpHeight >= 100) {
+                        clearInterval(jumpInterval);
+                        fall();
+                    }
+                    farmer.style.bottom = 100 + jumpHeight + 'px';
+                    jumpHeight += 5;
+                }, 20);
+            }
+        }
+
+        function fall() {
+            let fallHeight = 100;
+            const fallInterval = setInterval(() => {
+                if (fallHeight <= 0) {
+                    clearInterval(fallInterval);
+                    isJumping = false;
+                }
+                farmer.style.bottom = 100 + fallHeight + 'px';
+                fallHeight -= 5;
+            }, 20);
+        }
+
+        // Tractor movement
+        function moveTractor() {
+            let tractorPosition = -150;
+            tractor.style.left = tractorPosition + 'px';
+            
+            const tractorInterval = setInterval(() => {
+                if (!gameActive) clearInterval(tractorInterval);
+                tractorPosition += tractorSpeed;
+                tractor.style.left = tractorPosition + 'px';
+                
+                // Reset tractor position
+                if (tractorPosition > window.innerWidth) {
+                    tractorPosition = -150;
+                    tractorSpeed += 0.5;
+                }
+                
+                checkCollision();
+            }, 20);
+        }
+
+        // Hurdle creation
+        function createHurdle() {
+            if (!gameActive) return;
+            const hurdle = document.createElement('div');
+            hurdle.classList.add('hurdle');
+            hurdle.style.left = window.innerWidth + 'px';
+            gameContainer.appendChild(hurdle);
+            
+            const hurdleInterval = setInterval(() => {
+                if (!gameActive) clearInterval(hurdleInterval);
+                const hurdlePosition = parseInt(hurdle.style.left) || window.innerWidth;
+                hurdle.style.left = (hurdlePosition - 10) + 'px';
+                
+                if (hurdlePosition < -50) {
+                    hurdle.remove();
+                    clearInterval(hurdleInterval);
+                }
+                
+                checkCollision(hurdle);
+            }, 20);
+        }
+
+        // Collision detection
+        function checkCollision(obstacle) {
+            const farmerRect = farmer.getBoundingClientRect();
+            const tractorRect = tractor.getBoundingClientRect();
+            
+            if (obstacle) {
+                const obstacleRect = obstacle.getBoundingClientRect();
+                if (!(farmerRect.right < obstacleRect.left || 
+                      farmerRect.left > obstacleRect.right ||
+                      farmerRect.bottom < obstacleRect.top)) {
+                    gameOver();
+                }
+            }
+            
+            if (!(farmerRect.right < tractorRect.left || 
+                  farmerRect.left > tractorRect.right)) {
+                gameOver();
+            }
+        }
+
+        function gameOver() {
+            gameActive = false;
+            alert('Game Over! Score: ' + score);
+            location.reload();
+        }
+
+        // Score updating
+        function updateScore() {
+            if (gameActive) {
+                score++;
+                scoreElement.textContent = 'Score: ' + score;
+                setTimeout(updateScore, 1000);
+            }
+        }
+
+        // Start game
+        moveTractor();
+        setInterval(createHurdle, 2000);
+        updateScore();
+    </script>
+</body>
+</html>
