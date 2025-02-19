@@ -56,7 +56,7 @@
         const scoreElement = document.getElementById('score');
         
         let isJumping = false;
-        let score = 0;
+        let score = 7;
         let tractorSpeed = 5;
         let gameActive = true;
 
@@ -72,7 +72,7 @@
                 isJumping = true;
                 let jumpHeight = 0;
                 const jumpInterval = setInterval(() => {
-                    if (jumpHeight >= 100) {
+                    if (jumpHeight >= 110) {
                         clearInterval(jumpInterval);
                         fall();
                     }
@@ -89,7 +89,7 @@
                     clearInterval(fallInterval);
                     isJumping = false;
                 }
-                farmer.style.bottom = 100 + fallHeight + 'px';
+                farmer.style.bottom = 110 + fallHeight + 'px';
                 fallHeight -= 5;
             }, 20);
         }
@@ -106,7 +106,7 @@
                 
                 // Reset tractor position
                 if (tractorPosition > window.innerWidth) {
-                    tractorPosition = -150;
+                    tractorPosition = -170;
                     tractorSpeed += 0.5;
                 }
                 
@@ -127,7 +127,7 @@
                 const hurdlePosition = parseInt(hurdle.style.left) || window.innerWidth;
                 hurdle.style.left = (hurdlePosition - 10) + 'px';
                 
-                if (hurdlePosition < -50) {
+                if (hurdlePosition < -60) {
                     hurdle.remove();
                     clearInterval(hurdleInterval);
                 }
@@ -167,7 +167,7 @@
             if (gameActive) {
                 score++;
                 scoreElement.textContent = 'Score: ' + score;
-                setTimeout(updateScore, 1000);
+                setTimeout(updateScore, 2000);
             }
         }
 
